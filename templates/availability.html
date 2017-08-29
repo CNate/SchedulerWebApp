@@ -1,0 +1,232 @@
+<!--This html document is the availability page of our web app. It allows users to change their availability.-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Schedule - The Scheduler System</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/simple-sidebar.css') }}" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                        Scheduler
+                    </a>
+                </li>
+                <li id="adminView">
+                    <a href="http://127.0.0.1:5000/home_page">Change Your Availability</a>
+                </li>
+                <li>
+                    <a href="http://127.0.0.1:5000/schedule">View Current Schedule</a>
+                </li>
+                <li>
+                    <a href="http://127.0.0.1:5000/about">About</a>
+                </li>
+                <li>
+                    <a href="http://127.0.0.1:5000/logout">Logout</a> 
+                </li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+
+                        <!--Display current logged-in user name.-->
+                        {% if current_user.is_authenticated %}
+                            Hi {{ current_user.name }}!
+                        {% endif %}
+                        <h1>Please Select Your Availability</h1>
+
+
+                        <div class="table">
+                        <table style="border: solid">
+                          <tr>
+                            <th class="headers">Sunday</th>
+                            <th class="headers">Monday</th>
+                            <th class="headers">Tuesday</th>
+                            <th class="headers">Wednesday</th>
+                            <th class="headers">Thursday</th>
+                            <th class="headers">Friday</th>
+                            <th class="headers">Saturday</th>
+                          </tr>
+                          <tr>
+                         <td>
+                            <select name="sunday" id="sunday" class="dropdowns">
+                                <option value="am">AM</option>
+                                <option value="pm">PM</option>
+                                <option value="both">Both</option>
+                                <option value="none">None</option>
+                            </select>
+                        </td>
+                         <td>
+                            <select name="monday" id="monday" class="dropdowns">
+                                <option value="am">AM</option>
+                                <option value="pm">PM</option>
+                                <option value="both">Both</option>
+                                <option value="none">None</option>
+                            </select>
+                        </td>
+                         <td>
+                            <select name="tuesday" id="tuesday" class="dropdowns">
+                                <option value="am">AM</option>
+                                <option value="pm">PM</option>
+                                <option value="both">Both</option>
+                                <option value="none">None</option>
+                            </select>
+                        </td>
+                         <td>
+                            <select name="wednesday" id="wednesday" class="dropdowns">
+                                <option value="am">AM</option>
+                                <option value="pm">PM</option>
+                                <option value="both">Both</option>
+                                <option value="none">None</option>
+                             </select>
+                        </td>
+                         <td>
+                            <select name="thursday" id="thursday" class="dropdowns">
+                                <option value="am">AM</option>
+                                <option value="pm">PM</option>
+                                <option value="both">Both</option>
+                                <option value="none">None</option>
+                            </select>
+                        </td>
+                         <td>
+                            <select name="friday" id="friday" class="dropdowns">
+                                <option value="am">AM</option>
+                                <option value="pm">PM</option>
+                                <option value="both">Both</option>
+                                <option value="none">None</option>
+                            </select>
+                        </td>
+                         <td>
+                            <select name="saturday" id="saturday" class="dropdowns">
+                                <option value="am">AM</option>
+                                <option value="pm">PM</option>
+                                <option value="both">Both</option>
+                                <option value="none">None</option>
+                            </select>
+                        </td>
+                        </tr>
+                        </table>
+                        <br>
+                        <input class= "button" id="post_week" type="submit" value="Submit">                            
+                        </div>
+                        
+                        <!--</form>-->
+                        <h3 style="padding-left: 15px">NOTE TO USERS:</h3>
+                        <p style="padding-left: 15px">
+                            You must change your availability weekly. If you do not change them by the time the admin generates the schedule, then your availability will remain the same from week to week.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery -->
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+    <!-- Menu Toggle Script -->
+    <script>
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+    </script>
+
+    <!--Check admin user script.-->
+    <script>
+        function checkAdmin(){
+           var jqXHR = $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/checkAdmin",
+                success: function(evt){
+                    var jsonStr = JSON.stringify(evt, undefined, 2);
+                    var len = evt['admin'].length;
+                    var txt = "";
+
+                    if(evt['admin'][0] == "1"){
+                        txt += "<li><a href='http://127.0.0.1:5000/make_schedule'>Set Your Schedule</a></li>"
+                    }
+                    $('#adminView').append(txt);
+                }
+            });
+            return jqXHR.responseText;
+         }
+
+     $(window).load(function(){
+        checkAdmin();
+     });
+    </script>
+
+    <!--Page content script.-->
+     <script type="text/javascript">
+     <!--Function to post availability information to the database through the server.-->
+         function postWeekPyScript(sun, mon, tue, wed, thu, fri, sat){
+            var jqXHR = $.ajax({
+                type: "POST",
+                url: "http://127.0.0.1:5000/post/" + sun + "/" + mon + "/" + tue + "/" + wed + "/" + thu + "/" + fri + "/" + sat,
+                contentType:"application/json",
+                success: function (msg) {
+                  console.log(msg);
+                }
+            });
+            console.log(jqXHR.responseText);
+            return jqXHR.responseText;
+        }
+
+        $('#post_week').click(function(){
+            sun = document.getElementById("sunday").value
+            mon = document.getElementById("monday").value
+            tue = document.getElementById("tuesday").value
+            wed = document.getElementById("wednesday").value
+            thu = document.getElementById("thursday").value
+            fri = document.getElementById("friday").value
+            sat = document.getElementById("saturday").value
+            postWeekPyScript(sun, mon, tue, wed, thu, fri, sat);
+            alert("You have successfully sumbitted your availability");
+        });
+
+
+    </script>
+
+</body>
+
+</html>

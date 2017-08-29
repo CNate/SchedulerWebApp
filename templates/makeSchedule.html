@@ -1,0 +1,260 @@
+<!--This html document contains the scheduler page for our web app. Admin users can create a schedule on this page.-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Schedule - The Scheduler System</title>
+
+
+
+    <!-- Bootstrap Core CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/simple-sidebar.css') }}" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .sun {
+        text-align: left;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                        Scheduler
+                    </a>
+                </li>
+                <li id="adminView">
+                    <a href="http://127.0.0.1:5000/home_page">Change Your Availability</a>
+                </li>
+                <li>
+                    <a href="http://127.0.0.1:5000/schedule">View Current Schedule</a>
+                </li>
+                <li>
+                    <a href="http://127.0.0.1:5000/about">About</a>
+                </li>
+                <li>
+                    <a href="http://127.0.0.1:5000/logout">Logout</a> 
+                </li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <!--Display current user name.-->
+                        {% if current_user.is_authenticated %}
+                            Hi {{ current_user.name }}!
+                         {% endif %}
+                        <h1>Please Select Your Workers</h1>
+
+
+                        <!--Table for scheduler.-->
+                        <div class="div">
+                            <form id="form1"  action="http://127.0.0.1:5000/postschedule" method="post" >
+                        <table class="table" style="border: solid">
+                          <tr>
+                              <th></th>
+                            <th>Sunday</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                          </tr>
+                            <tr class="makeSchedCell" style="text-align: left;">
+                                <td id="am">AM</td>
+                                <td id="sun"></td>
+                                <td id="mon"></td>
+                                <td id="tues"></td>
+                                <td id="wed"></td>
+                                <td id="thur"></td>
+                                <td id="fri"></td>
+                                <td id="sat"></td>
+                            </tr>
+                            <tr class="makeSchedCell" style="text-align: left;">
+                                <td id="pm">PM</td>
+                                <td id="sn"></td>
+                                <td id="mn"></td>
+                                <td id="ts"></td>
+                                <td id="wd"></td>
+                                <td id="th"></td>
+                                <td id="fr"></td>
+                                <td id="st"></td>
+                            </tr>
+                        </table>
+                            <br>
+                                <input type="submit">
+                                </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- /#page-content-wrapper -->
+        <h3 style="padding-left: 30px">NOTE TO THE ADMIN:</h3>
+        <ul style="padding-left: 30px">
+            <li>Only three employees can be scheduled per time slot per day.</li> 
+            <ul><li>For example: Three employees in the morning and three employees in the evening per day.</li></ul>
+            <li>An employee can only work eight shifts total in a week.</li>
+            <li>Please manually keep track of any overtime hours if they are to occur.</li>
+        </ul>
+       
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery -->
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+    <!-- Menu Toggle Script -->
+    <script>
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+    </script>
+
+    <!--Check Admin user script.-->
+    <script>
+        function checkAdmin(){
+            var jqXHR = $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/checkAdmin",
+                success: function(evt){
+                            var jsonStr = JSON.stringify(evt, undefined, 2);
+                            var len = evt['admin'].length;
+                            var txt = "";
+
+                            if(evt['admin'][0] == "1"){
+                                txt += "<li><a href='http://127.0.0.1:5000/make_schedule'>Set Your Schedule</a></li>"
+                            }
+                            $('#adminView').append(txt);
+                    }
+                });
+            return jqXHR.responseText;
+        }
+
+         $(window).load(function(){
+            checkAdmin();
+         });
+        </script>
+
+    <!--Page content script.-->
+    <script type="text/javascript">
+    <!--This function calls the server get all employees available on specified day and time.-->
+        function getAvailDayScript(day, tod, id){
+            var jqXHR = $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/get/" + day + "/" + tod,
+                success: function(evt){
+                        var jsonStr = JSON.stringify(evt, undefined, 2);
+                        var len = evt['name'].length;
+                        var txt = "";
+
+                        for(var i=0; i<len; i++){
+                            txt += "<input type='checkbox' class='" + id + "' name='" + evt['name'][i][2] + "' value='"+id+"' id='" + evt['name'][i][0] + "'> " + evt['name'][i][0] + " " + evt['name'][i][1] + "<br>"
+                        }
+                        $('#' + id + '').append(txt);
+                }
+            });
+        return jqXHR.responseText;
+        }
+
+        $(window).load(function(){
+            getAvailDayScript("Sunday", "am", "sun");
+            getAvailDayScript("Sunday", "pm", "sn");
+            getAvailDayScript("Monday", "am", "mon");
+            getAvailDayScript("Monday", "pm", "mn");
+            getAvailDayScript("Tuesday", "am", "tues");
+            getAvailDayScript("Tuesday", "pm", "ts");
+            getAvailDayScript("Wednesday", "am", "wed");
+            getAvailDayScript("Wednesday", "pm", "wd");
+            getAvailDayScript("Thursday", "am", "thur");
+            getAvailDayScript("Thursday", "pm", "th");
+            getAvailDayScript("Friday", "am", "fri");
+            getAvailDayScript("Friday", "pm", "fr");
+            getAvailDayScript("Saturday", "am", "sat");
+            getAvailDayScript("Saturday", "pm", "st");
+        });
+
+        <!--This function checks that no more than three empolyees work any given shift.-->
+        $('#form1').on('click',function(e){
+            var clas = e.target.className;
+                var checked = document.querySelectorAll('input[type="checkbox"].'+clas+':checked');
+                var notchecked = document.querySelectorAll('input[type="checkbox"].'+clas+':not(:checked)');
+                var countchecked = checked.length;
+
+
+                    if(countchecked > 2){
+                        for (i = 0, l = notchecked.length; i < l; i++)
+                            notchecked[i].disabled = true;
+                    }
+                    else{
+                        for (i = 0, l = notchecked.length; i < l; i++)
+                            if(document.querySelectorAll("input[id='"+notchecked[i].id+"']:checked").length > 7)
+                                notchecked[i].disabled = true;
+                            else
+                                notchecked[i].disabled = false;
+                    }
+        });
+
+        <!--This function checks to ensure any given employee does not have more than 8 shifts in one week.-->
+        $('#form1').on('click',function(e){
+            var id = e.target.id;
+                var checked = document.querySelectorAll("input[id='"+id+"']:checked");
+                var notchecked = document.querySelectorAll("input[id='"+id+"']:not(:checked)");
+                var countchecked = checked.length;
+                console.log(countchecked);
+
+                    if(countchecked > 7){
+                        for (i = 0, l = notchecked.length; i < l; i++)
+                            notchecked[i].disabled = true;
+                    }
+                    else{
+                        for (i = 0, l = notchecked.length; i < l; i++)
+                            if(document.querySelectorAll('input[type="checkbox"].'+notchecked[i].className+':checked').length > 2)
+                                notchecked[i].disabled = true;
+                            else
+                                notchecked[i].disabled = false;
+                    }
+                    console.log(checked);
+                console.log(notchecked);
+        });
+
+
+    </script>
+
+</body>
+
+</html>

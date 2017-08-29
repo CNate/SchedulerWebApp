@@ -1,0 +1,198 @@
+<!--This html document is the page that shows the current posted schedule.-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Schedule - The Scheduler System</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/simple-sidebar.css') }}" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                        Scheduler
+                    </a>
+                </li>
+                <li id="adminView">
+                    <a href="http://127.0.0.1:5000/home_page">Change Your Availability</a>
+                </li>
+                <li>
+                    <a href="http://127.0.0.1:5000/schedule">View Current Schedule</a>
+                </li>
+                <li>
+                    <a href="http://127.0.0.1:5000/about">About</a>
+                </li>
+                <li>
+                    <a href="http://127.0.0.1:5000/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+
+                        <!--Display current logged-in user.-->
+                        {% if current_user.is_authenticated %}
+                            Hi {{ current_user.name }}!
+                        {% endif %}
+                        <h1>Schedule</h1>
+
+
+                        <!--Table to display schedule.-->
+                        <div class="div">
+                            <table class="table" style="border: solid">
+                              <tr>
+                                  <th></th>
+                                <th>Sunday</th>
+                                <th>Monday</th>
+                                <th>Tuesday</th>
+                                <th>Wednesday</th>
+                                <th>Thursday</th>
+                                <th>Friday</th>
+                                <th>Saturday</th>
+                              </tr>
+                                <tr>
+                                    <td id="am">AM</td>
+                                    <td id="sun"></td>
+                                    <td id="mon"></td>
+                                    <td id="tues"></td>
+                                    <td id="wed"></td>
+                                    <td id="thur"></td>
+                                    <td id="fri"></td>
+                                    <td id="sat"></td>
+                                </tr>
+                                <tr>
+                                    <td id="pm">PM</td>
+                                    <td id="sn"></td>
+                                    <td id="mn"></td>
+                                    <td id="ts"></td>
+                                    <td id="wd"></td>
+                                    <td id="th"></td>
+                                    <td id="fr"></td>
+                                    <td id="st"></td>
+                                </tr>
+                            </table>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- jQuery -->
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+    <!-- Menu Toggle Script -->
+    <script>
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+    </script>
+
+    <!--Page content script.-->
+    <script>
+        <!--Function to check if user is admin or not.-->
+        function checkAdmin(){
+            var jqXHR = $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/checkAdmin",
+                success: function(evt){
+                        var jsonStr = JSON.stringify(evt, undefined, 2);
+                        var len = evt['admin'].length;
+                        var txt = "";
+
+                        if(evt['admin'][0] == "1"){
+                           txt += "<li><a href='http://127.0.0.1:5000/make_schedule'>Set Your Schedule</a></li>"
+                        }
+                        $('#adminView').append(txt);
+            }
+        });
+        return jqXHR.responseText;
+    }
+
+    <!--Calls checkAdmin function on page load.-->
+     $(window).load(function(){
+        checkAdmin();
+     });
+
+    </script>
+
+        <!--More Page content script.-->
+    <script type="text/javascript">
+        <!--Function calls server to get schedule from database.-->
+        function getSchedule(day, tod, id){
+            var jqXHR = $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/getSched/" + day + "/" + tod,
+                success: function(evt){
+                            var jsonStr = JSON.stringify(evt, undefined, 2);
+                            var len = evt['name'].length;
+                            var txt = "";
+
+                            for(var i=0; i<len; i++){
+                                txt += "<label>" + evt['name'][i][0] + " " + evt['name'][i][1] + "</label><br>"
+                            }
+
+                            $('#' + id + '').append(txt);
+                }
+            });
+            return jqXHR.responseText;
+        }
+
+        <!--Calls getSchedule function for each shift.-->
+        $(window).load(function(){
+			getSchedule("Sunday", "am", "sun");
+			getSchedule("Sunday", "pm", "sn");
+			getSchedule("Monday", "am", "mon");
+			getSchedule("Monday", "pm", "mn");
+			getSchedule("Tuesday", "am", "tues");
+			getSchedule("Tuesday", "pm", "ts");
+			getSchedule("Wednesday", "am", "wed");
+			getSchedule("Wednesday", "pm", "wd");
+			getSchedule("Thursday", "am", "thur");
+			getSchedule("Thursday", "pm", "th");
+			getSchedule("Friday", "am", "fri");
+			getSchedule("Friday", "pm", "fr");
+			getSchedule("Saturday", "am", "sat");
+			getSchedule("Saturday", "pm", "st");
+		});
+    </script>
+
+</div>
+</body>
+
+</html>
